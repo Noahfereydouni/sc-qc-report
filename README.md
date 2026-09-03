@@ -10,12 +10,12 @@ The report above is the synthetic poor quality sample bundled with this repo. Th
 
 | Metric | Why it matters |
 | --- | --- |
-| UMI counts per cell | How deeply each cell was sequenced. Low counts mean RNA capture went badly, and rare populations will be hard to call. |
-| Genes detected per cell | How complex each barcode is. A barcode with very few genes is usually ambient RNA or debris rather than a cell. |
-| Percent mitochondrial reads | Cells that were stressed or already broken open at capture lose cytoplasmic RNA, so what is left reads as mitochondria heavy. |
-| Percent ribosomal reads | Strongly tissue dependent, so it is context rather than a pass or fail. Read it alongside gene complexity. |
-| Doublet score | Two cells under one barcode look like a novel cell type in the clustering. Scrublet scores every barcode against simulated doublets. |
-| Cells and genes before and after filtering | Shows how much of the sample you lost and which filter took it. Losing most of your barcodes points at a problem before sequencing. |
+| UMI counts per cell | A low median means the chemistry underperformed or the cells were fragile. Small populations sink below the noise, so you cannot trust their absence. |
+| Genes detected per cell | A low median, especially with a second peak near zero, means many of your barcodes are empty droplets carrying ambient RNA rather than real cells. |
+| Percent mitochondrial reads | A high value means cells were dying before they reached the instrument, usually because dissociation was too harsh or too slow. Filtering afterwards does not bring those cells back. |
+| Percent ribosomal reads | High ribosomal content alongside low gene counts is the signature of stressed cells whose transcriptome has collapsed onto housekeeping genes. On its own it varies widely between tissues and means little. |
+| Doublet score | A high flagged fraction means too many cells were loaded. The cost turns up later as clusters that look like novel intermediate cell types but are two cells stuck together. |
+| Cells and genes before and after filtering | A large drop says the problem happened before sequencing, not in the analysis. Which filter removed them says which problem: low complexity, dying cells, or overloading. |
 
 Each metric gets a violin and a histogram. A plain language verdict at the top says whether the sample looks healthy and, if not, which metric is the concern.
 
