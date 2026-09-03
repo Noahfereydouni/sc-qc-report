@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 test_data/
 qc_report*.html
+
+# scanpy caches downloaded datasets here
+data/
