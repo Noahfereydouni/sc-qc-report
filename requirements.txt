@@ -5,3 +5,4 @@ matplotlib>=3.7
 numpy>=1.24
 pandas>=2.0
 scipy>=1.10
+certifi           # scanpy needs this to download the pbmc3k example data
