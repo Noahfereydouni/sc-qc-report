@@ -19,11 +19,19 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass, field
+from inspect import signature
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import scanpy as sc
+
+# scanpy 1.13 moved the readers into scanpy.io and warns when they are called
+# from the top-level namespace. Older versions have no scanpy.io at all.
+try:
+    from scanpy.io import read_10x_mtx as _read_10x_mtx
+except ImportError:  # scanpy < 1.13
+    from scanpy import read_10x_mtx as _read_10x_mtx
 
 
 # --------------------------------------------------------------------------
@@ -89,7 +97,7 @@ def load_matrix(matrix_dir: str | Path) -> sc.AnnData:
             "(no matrix.mtx or matrix.mtx.gz inside)."
         )
 
-    adata = sc.read_10x_mtx(matrix_dir, var_names="gene_symbols", cache=False)
+    adata = _read_10x_mtx(matrix_dir, var_names="gene_symbols", cache=False)
     # Two cells can share a gene symbol in some references; make names unique
     # so downstream indexing is unambiguous.
     adata.var_names_make_unique()
@@ -116,13 +124,14 @@ def annotate_gene_families(adata: sc.AnnData) -> None:
 def compute_per_cell_metrics(adata: sc.AnnData) -> None:
     """Fill in total_counts, n_genes_by_counts, pct_counts_mt, pct_counts_ribo."""
     annotate_gene_families(adata)
-    sc.pp.calculate_qc_metrics(
-        adata,
-        qc_vars=["mt", "ribo"],
-        percent_top=None,
-        log1p=False,
-        inplace=True,
-    )
+    kwargs = dict(qc_vars=["mt", "ribo"], percent_top=None, log1p=False)
+    # scanpy 1.13 renamed the write-into-adata switch from inplace=True to
+    # out=False and warns on the old spelling. Pick whichever this install has.
+    if "out" in signature(sc.pp.calculate_qc_metrics).parameters:
+        kwargs["out"] = False
+    else:
+        kwargs["inplace"] = True
+    sc.pp.calculate_qc_metrics(adata, **kwargs)
 
 
 # --------------------------------------------------------------------------
